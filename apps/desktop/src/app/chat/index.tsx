@@ -5,6 +5,7 @@ import type * as React from 'react'
 import { memo, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
 
+import { WelcomeBackNote } from '@/app/chat/welcome-back'
 import type { SubmitTextOptions } from '@/app/session/hooks/use-prompt-actions/utils'
 import { sessionShouldHaveTranscript } from '@/app/session/hooks/use-session-actions/utils'
 import { Thread } from '@/components/assistant-ui/thread'
@@ -807,6 +808,7 @@ const ChatViewContent = memo(function ChatViewContent({
             sessionKey={threadKey}
           />
           {isPrimary && isMainWindow() && <IntroCopy />}
+          {isPrimary && isMainWindow() && <WelcomeBackNote />}
           {resumeExhausted && routedSessionId && (
             <ResumeExhaustedOverlay onRetryResume={onRetryResume} sessionId={routedSessionId} />
           )}

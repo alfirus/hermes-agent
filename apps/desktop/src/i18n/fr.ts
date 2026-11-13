@@ -5481,6 +5481,9 @@ export const frOverrides = {
     readOnlyTranscriptSendBlocked:
       "Cette conversation est ouverte comme transcription en lecture seule — l'envoi est désactivé.",
     resumeStrandedTitle: 'Impossible de charger cette session',
+    welcomeBackUpdated: 'Hermes Desktop a été mis à jour vers',
+    welcomeBackChanges: 'Voir les nouveautés',
+    welcomeBackDismiss: 'Ignorer cette note de mise à jour',
     resumeStrandedBody:
       "La connexion à cette session a échoué et les nouvelles tentatives automatiques ont été abandonnées. Vérifiez que la Gateway est en cours d'exécution, puis réessayez.",
     poolSlotTimeoutBody:

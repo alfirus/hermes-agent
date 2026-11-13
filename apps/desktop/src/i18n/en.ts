@@ -4790,6 +4790,9 @@ export const en: Translations = {
       'No connected backend claims this older chat yet, so it opened as a read-only transcript. Its history is intact; sending is disabled until a backend claims it.',
     readOnlyTranscriptSendBlocked: 'This chat is open as a read-only transcript — sending is disabled.',
     resumeStrandedTitle: "Couldn't load this session",
+    welcomeBackUpdated: 'Hermes Desktop updated to',
+    welcomeBackChanges: 'See what changed',
+    welcomeBackDismiss: 'Dismiss this update note',
     resumeStrandedBody:
       'The connection to this session failed and automatic retries gave up. Check that the gateway is running, then try again.',
     poolSlotTimeoutBody:

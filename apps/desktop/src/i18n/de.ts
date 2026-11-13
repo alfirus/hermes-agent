@@ -5472,6 +5472,9 @@ export const deOverrides = {
     readOnlyTranscriptSendBlocked:
       'Dieser Chat ist als schreibgeschütztes Transkript geöffnet — Senden ist deaktiviert.',
     resumeStrandedTitle: 'Diese Session konnte nicht geladen werden',
+    welcomeBackUpdated: 'Hermes Desktop wurde aktualisiert auf',
+    welcomeBackChanges: 'Änderungen ansehen',
+    welcomeBackDismiss: 'Diesen Update-Hinweis ausblenden',
     resumeStrandedBody:
       'Die Verbindung zu dieser Session ist fehlgeschlagen, und automatische Wiederholungen wurden eingestellt. Prüfen Sie, ob das Gateway läuft, und versuchen Sie es erneut.',
     poolSlotTimeoutBody:

@@ -99,6 +99,7 @@ import {
 import { orderTilesByTree } from './session-tile-order'
 import { ackStoredSessionId, isMessagingCompletion, markSessionUnreadFinished } from './session-unread'
 import { migrateTranscriptTailsForProfile } from './transcript-tail-cache'
+import { dropWelcomeBackForProfile, migrateWelcomeBackForProfile } from './welcome-back'
 import { isBrowserWindow, isSecondaryWindow } from './windows'
 
 // ---------------------------------------------------------------------------
@@ -2799,6 +2800,7 @@ export function dropTilesForProfile(
   dropPreviewTabsForProfile(name, (String(route?.connectionId ?? '').trim() || LOCAL_CONNECTION_ID) === LOCAL_CONNECTION_ID)
   dropBrowserProfilePrefs(name, route?.connectionId?.trim() || undefined)
   dropQueuedLaunchPicksForProfile(name, route ? (route.connectionId ?? '') : undefined)
+  dropWelcomeBackForProfile(name)
 }
 
 /**
@@ -2853,6 +2855,7 @@ export function migrateTilesForProfile(oldProfile: string, newProfile: string): 
   migratePreviewTabsForProfile(from, to)
   migrateBrowserProfilePrefs(from, to)
   migrateQueuedLaunchPicksForProfile(from, to)
+  migrateWelcomeBackForProfile(from, to)
 }
 
 /** ⌘⇧T — reopen the most recently closed tab where it was, then focus it.

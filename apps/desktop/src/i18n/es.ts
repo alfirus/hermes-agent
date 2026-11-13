@@ -5455,6 +5455,9 @@ export const esOverrides = {
     readOnlyTranscriptSendBlocked:
       'Este chat está abierto como transcripción de solo lectura: el envío está desactivado.',
     resumeStrandedTitle: 'No se pudo cargar esta sesión',
+    welcomeBackUpdated: 'Hermes Desktop se actualizó a',
+    welcomeBackChanges: 'Ver los cambios',
+    welcomeBackDismiss: 'Descartar esta nota de actualización',
     resumeStrandedBody:
       'No se pudo conectar con esta sesión y se agotaron los reintentos automáticos. Comprueba que el gateway esté en ejecución y vuelve a intentarlo.',
     poolSlotTimeoutBody:
