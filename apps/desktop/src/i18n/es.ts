@@ -4193,6 +4193,7 @@ export const esOverrides = {
     updateReady: count =>
       `Hay una actualización lista (${count} ${count === 1 ? 'cambio incluido' : 'cambios incluidos'}).`,
     updateReadyUnknown: 'Hay una nueva actualización lista.',
+    whatChanged: 'Qué ha cambiado',
     lastChecked: age => `Última comprobación ${age}`,
     justNowSuffix: ' · ahora mismo',
     never: 'nunca',

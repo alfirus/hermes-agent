@@ -90,5 +90,6 @@ export interface BootTranslations {
     confirmKeepWaiting: string
     confirmStart: string
     startAnywayRefused: string
+    remindLater: string
   }
 }

@@ -5,6 +5,12 @@ import { Button } from '@/components/ui/button'
 import type { UpdateHoldWire } from '@/global'
 import { useI18n } from '@/i18n'
 import { AlertTriangle, FileText, Loader2, Power, RefreshCw } from '@/lib/icons'
+import {
+  DEFAULT_SNOOZE_MS,
+  isHoldSnoozed,
+  readHoldSnooze,
+  writeHoldSnooze
+} from '@/lib/update-hold-snooze'
 import { $desktopBoot } from '@/store/boot'
 
 type Busy = 'quit' | 'recheck' | 'start' | null
@@ -42,7 +48,32 @@ export function UpdateHoldOverlay() {
     setBusy(null)
   }, [holdId])
 
-  if (!hold) {
+  // "Remind me later": a localStorage-backed snooze for THIS hold. While it
+  // runs the overlay stays hidden; it wakes itself when the timestamp passes,
+  // and a new hold id never matches the old snooze.
+  const [snooze, setSnooze] = useState(readHoldSnooze)
+  const snoozed = isHoldSnoozed(snooze, holdId, Date.now())
+
+  useEffect(() => {
+    if (!snoozed || !snooze) {
+      return
+    }
+
+    const delay = Math.max(0, snooze.until - Date.now())
+    const wake = window.setTimeout(() => setSnooze(current => (current ? { ...current } : current)), delay)
+
+    return () => window.clearTimeout(wake)
+  }, [snoozed, snooze])
+
+  const snoozeHold = () => {
+    if (!holdId) {
+      return
+    }
+
+    setSnooze({ holdId, until: writeHoldSnooze(holdId, DEFAULT_SNOOZE_MS, Date.now()) })
+  }
+
+  if (!hold || snoozed) {
     return null
   }
 
@@ -141,6 +172,9 @@ export function UpdateHoldOverlay() {
                 <Button onClick={openLogs} variant="ghost">
                   <FileText />
                   {copy.openLogs}
+                </Button>
+                <Button disabled={Boolean(busy)} onClick={snoozeHold} variant="ghost">
+                  {copy.remindLater}
                 </Button>
                 <Button
                   className="ml-auto"

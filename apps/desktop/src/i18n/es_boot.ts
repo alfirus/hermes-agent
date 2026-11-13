@@ -99,6 +99,7 @@ export const esBoot = {
         'El proceso de actualización restante quizá siga cambiando archivos de Hermes. Iniciar ahora puede cargar una instalación a medio actualizar, que puede no funcionar hasta que vuelvas a ejecutar la actualización. Hermes registra esta decisión y deja el marcador de actualización en su lugar.',
       confirmKeepWaiting: 'Seguir esperando',
       confirmStart: 'Iniciar de todos modos',
+      remindLater: 'Recordarme más tarde',
       startAnywayRefused:
         'Lo que retiene la instalación cambió antes de que Hermes pudiera iniciar. Revísalo e inténtalo de nuevo.'
     }

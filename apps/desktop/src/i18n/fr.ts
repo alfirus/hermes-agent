@@ -4214,6 +4214,7 @@ export const frOverrides = {
     tapCheck: 'Cliquez sur « Vérifier maintenant » pour rechercher des mises à jour.',
     updateReady: count => `Une nouvelle mise à jour est prête (${count} changement${count === 1 ? '' : 's'} inclus).`,
     updateReadyUnknown: 'Une nouvelle mise à jour est prête.',
+    whatChanged: 'Ce qui a changé',
     lastChecked: age => `Dernière vérification ${age}`,
     justNowSuffix: " · à l'instant",
     never: 'jamais',

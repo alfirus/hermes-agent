@@ -65,6 +65,33 @@ export function updateNotesUrl(source: UpdateNotesSource, status: NotesStatus): 
     : `${SITE}/commits/main`
 }
 
+/**
+ * The GitHub release page for one available version: "0.22.0" and "v0.22.0"
+ * both resolve to .../releases/tag/v0.22.0. Feeds name versions with or
+ * without the leading v, so normalize before building the tag URL.
+ */
+export function releasePageUrl(version: string): string {
+  const trimmed = version.trim()
+  const tag = /^v\d/i.test(trimmed) ? trimmed : `v${trimmed}`
+
+  return `${SITE}/releases/tag/${encodeURIComponent(tag)}`
+}
+
+/**
+ * The release page for the version this check offers, or null when the update
+ * is not a tagged release (main-channel commits, canary, custom branch) or
+ * moves backwards (a rollback — pointing at "what changed" would be dishonest).
+ */
+export function availableReleasePageUrl(status: NotesStatus): string | null {
+  if (status.rollback) {
+    return null
+  }
+
+  const tag = updateReleaseTag(status)
+
+  return tag ? releasePageUrl(tag) : null
+}
+
 // Full text: the dialog clamps the display and keeps the whole item for hover.
 function plain(markdown: string): string {
   return markdown

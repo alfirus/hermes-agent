@@ -105,7 +105,8 @@ export const enBoot = {
         "The leftover update process may still be changing Hermes' files. Starting now can load a half-updated install, which may not work until you run the update again. Hermes records this choice in its log and leaves the update marker in place.",
       confirmKeepWaiting: 'Keep waiting',
       confirmStart: 'Start anyway',
-      startAnywayRefused: 'What holds the install changed before Hermes could start. Review it and try again.'
+      startAnywayRefused: 'What holds the install changed before Hermes could start. Review it and try again.',
+      remindLater: 'Remind me later'
     }
   }
 } satisfies Pick<Translations, 'boot'>

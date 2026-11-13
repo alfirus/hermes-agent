@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractReleaseHighlights, latestMergedPrTitles, updateNotesSource } from './update-notes'
+import {
+  availableReleasePageUrl,
+  extractReleaseHighlights,
+  latestMergedPrTitles,
+  releasePageUrl,
+  updateNotesSource
+} from './update-notes'
 
 describe('update notes', () => {
   it('summarizes a release as its highlight headlines, and falls back to the first bullet list', () => {
@@ -61,5 +67,29 @@ describe('update notes', () => {
     expect(updateNotesSource({ branch: 'my-feature', channel: 'main' })).toBeNull()
     expect(updateNotesSource({ channel: 'main' })).toEqual({ kind: 'prs' })
     expect(updateNotesSource({ channel: 'stable', rollback: true, sourceVersion: '0.21.0' })).toBeNull()
+  })
+})
+
+describe('release page URL', () => {
+  it('normalizes a version to its v-tag and builds the GitHub tag URL', () => {
+    expect(releasePageUrl('0.22.0')).toBe('https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0')
+    // Feeds already name the tag; no double v.
+    expect(releasePageUrl('v0.22.0')).toBe('https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0')
+    expect(releasePageUrl(' 0.22.0 ')).toBe('https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0')
+  })
+
+  it('offers a release page only for a forward tagged-release update', () => {
+    expect(availableReleasePageUrl({ channel: 'stable', sourceVersion: '0.22.0' })).toBe(
+      'https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.0'
+    )
+    // Packaged feeds carry the tag directly.
+    expect(availableReleasePageUrl({ channel: 'stable', latestTag: 'v0.21.6' })).toBe(
+      'https://github.com/NousResearch/hermes-agent/releases/tag/v0.21.6'
+    )
+    // A rollback moves back: no "what changed" for it.
+    expect(availableReleasePageUrl({ channel: 'stable', rollback: true, sourceVersion: '0.21.0' })).toBeNull()
+    // Main-channel / custom-branch updates have no single release page.
+    expect(availableReleasePageUrl({ branch: 'main' })).toBeNull()
+    expect(availableReleasePageUrl({ branch: 'my-feature' })).toBeNull()
   })
 })

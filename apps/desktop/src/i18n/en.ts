@@ -3826,6 +3826,7 @@ export const en: Translations = {
     tapCheck: 'Tap "Check now" to look for updates.',
     updateReady: count => `A new update is ready (${count} change${count === 1 ? '' : 's'} included).`,
     updateReadyUnknown: 'A new update is ready.',
+    whatChanged: 'What changed',
     availableBodyRelease: tag => `Version ${tag} is ready to install.`,
     lastChecked: age => `Last checked ${age}`,
     never: 'never',

@@ -102,6 +102,7 @@ export const frBoot = {
         'Le processus de mise à jour restant modifie peut-être encore les fichiers de Hermes. Démarrer maintenant peut charger une installation à moitié mise à jour, qui risque de ne pas fonctionner avant une nouvelle mise à jour. Hermes consigne ce choix dans son journal et laisse le marqueur de mise à jour en place.',
       confirmKeepWaiting: 'Continuer à attendre',
       confirmStart: 'Démarrer quand même',
+      remindLater: 'Me rappeler plus tard',
       startAnywayRefused:
         "Ce qui bloque l'installation a changé avant que Hermes puisse démarrer. Vérifiez et réessayez."
     }

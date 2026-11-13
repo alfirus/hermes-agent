@@ -4204,6 +4204,7 @@ export const deOverrides = {
     tapCheck: 'Tippen Sie auf „Jetzt prüfen“, um nach Updates zu suchen.',
     updateReady: count => `Ein neues Update ist bereit (${count} Änderung${count === 1 ? '' : 'en'} enthalten).`,
     updateReadyUnknown: 'Ein neues Update ist bereit.',
+    whatChanged: 'Was geändert wurde',
     lastChecked: age => `Zuletzt geprüft ${age}`,
     justNowSuffix: ' · gerade eben',
     never: 'nie',

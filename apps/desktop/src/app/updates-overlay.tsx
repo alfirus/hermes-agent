@@ -30,9 +30,16 @@ import type {
 import { useI18n } from '@/i18n'
 import { writeClipboardText } from '@/lib/clipboard'
 import { buildCommitChangelog, type CommitGroup, formatFullChangelogText } from '@/lib/commit-changelog'
+import { openExternalLink } from '@/lib/external-link'
 import { AlertCircle, Check, Copy, ExternalLink, Terminal } from '@/lib/icons'
 import { resolveUpdateCopy, rollbackRelease, type UpdateTarget } from '@/lib/update-copy'
-import { fetchUpdateNoteItems, updateNotesSource, updateNotesUrl, updateReleaseTag } from '@/lib/update-notes'
+import {
+  availableReleasePageUrl,
+  fetchUpdateNoteItems,
+  updateNotesSource,
+  updateNotesUrl,
+  updateReleaseTag
+} from '@/lib/update-notes'
 import { cn } from '@/lib/utils'
 import {
   $backendUpdateApply,
@@ -447,6 +454,11 @@ function IdleView({
 
   const handleCopyFullLog = () => formatFullChangelogText(commits, behind, status.branch)
 
+  // Per available version: the GitHub release page it installs, opened in the
+  // system browser. Only for tagged-release updates (main-channel updates
+  // already show their change list with an onward link above).
+  const releasePage = availableReleasePageUrl(status)
+
   return (
     <div className="grid gap-5 px-6 pb-6 pt-7 pr-8">
       <div className="flex flex-col items-center gap-3 text-center">
@@ -467,6 +479,18 @@ function IdleView({
         <Button className="font-semibold" onClick={onInstall} size="lg">
           {rollbackTag ? channelCopy.rollbackAction(rollbackTag) : u.updateNow}
         </Button>
+        {releasePage ? (
+          <Button
+            className="font-medium"
+            onClick={() => openExternalLink(releasePage)}
+            size="sm"
+            type="button"
+            variant="text"
+          >
+            <ExternalLink className="size-3.5" />
+            {u.whatChanged}
+          </Button>
+        ) : null}
         <Button className="font-medium" onClick={onLater} type="button" variant="text">
           {u.maybeLater}
         </Button>

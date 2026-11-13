@@ -103,6 +103,7 @@ export const deBoot = {
         'Der übrig gebliebene Update-Prozess ändert womöglich noch Dateien von Hermes. Ein Start jetzt kann eine halb aktualisierte Installation laden, die erst nach einem erneuten Update wieder funktioniert. Hermes protokolliert diese Entscheidung und lässt die Update-Markierung bestehen.',
       confirmKeepWaiting: 'Weiter warten',
       confirmStart: 'Trotzdem starten',
+      remindLater: 'Später erinnern',
       startAnywayRefused:
         'Was die Installation festhält, hat sich geändert, bevor Hermes starten konnte. Bitte erneut prüfen.'
     }

@@ -3294,6 +3294,7 @@ export interface Translations extends NoticeTranslations {
     tapCheck: string
     updateReady: (count: number) => string
     updateReadyUnknown: string
+    whatChanged: string
     availableBodyRelease: (tag: string) => string
     lastChecked: (age: string) => string
     never: string
