@@ -3223,6 +3223,7 @@ export const en: Translations = {
     searchPlaceholder: 'Search sessions…',
     clearSearch: 'Clear search',
     noMatch: query => `No sessions match “${query}”.`,
+    startSessionAbout: query => `Start a session about “${query}”`,
     results: 'Results',
     pinned: 'Pinned',
     sessions: 'Sessions',

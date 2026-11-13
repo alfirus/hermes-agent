@@ -451,8 +451,23 @@ export function resolveActiveSourceOwnerRoute(profile: string): AgentProfileRout
 // resets to the intro draft, so we never strand the user in an orphaned view.
 export const $freshSessionRequest = atom(0)
 
-export function requestFreshSession(): void {
+// Optional composer seed carried by a fresh-session request: when a dead-end
+// (e.g. a sidebar search with no matches) sends the user to a new draft, the
+// text that started the search can ride along into the composer. Consumed
+// once — by the same effect that opens the draft — so a later plain fresh
+// request never inherits a stale seed.
+export const $freshSessionDraftSeed = atom<null | string>(null)
+
+export function requestFreshSession(draft?: string): void {
+  $freshSessionDraftSeed.set(draft?.trim() || null)
   $freshSessionRequest.set($freshSessionRequest.get() + 1)
+}
+
+export function takeFreshSessionDraftSeed(): null | string {
+  const seed = $freshSessionDraftSeed.get()
+  $freshSessionDraftSeed.set(null)
+
+  return seed
 }
 
 // Route profile-scoped REST settings (config/env/skills/tools/model/…) to the

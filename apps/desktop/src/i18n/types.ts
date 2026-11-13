@@ -2830,6 +2830,7 @@ export interface Translations extends NoticeTranslations {
     searchPlaceholder: string
     clearSearch: string
     noMatch: (query: string) => string
+    startSessionAbout: (query: string) => string
     results: string
     pinned: string
     sessions: string

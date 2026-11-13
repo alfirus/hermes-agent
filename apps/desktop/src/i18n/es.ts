@@ -3654,6 +3654,7 @@ export const esOverrides = {
     searchPlaceholder: 'Buscar sesiones…',
     clearSearch: 'Limpiar búsqueda',
     noMatch: query => `Ninguna sesión coincide con “${query}”.`,
+    startSessionAbout: query => `Iniciar una sesión sobre “${query}”`,
     results: 'Resultados',
     pinned: 'Fijadas',
     sessions: 'Sesiones',

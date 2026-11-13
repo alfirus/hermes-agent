@@ -8,6 +8,7 @@ import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
 import { AlertTriangle, ExternalLink } from '@/lib/icons'
 import { cn } from '@/lib/utils'
+import { requestFreshSession } from '@/store/profile'
 import { $corruptSessionStores } from '@/store/session'
 
 import { SidebarRowCluster, SidebarRowShell, SidebarRowStack } from './chrome'
@@ -62,6 +63,34 @@ export function SidebarBlankState({ onNewProject }: { onNewProject: () => void }
           <Codicon name="add" size="0.75rem" />
           {s.projects.newButton}
         </Button>
+      </div>
+    </div>
+  )
+}
+
+// The search dead-end. A query that matches no session is a wasted trip —
+// the thing the user was looking for is exactly what a new session should be
+// about. Offer one tap to start a fresh draft seeded with the query, so the
+// search box feeds the composer instead of just saying "no".
+export function SidebarSearchNoMatchState({ query }: { query: string }) {
+  const { t } = useI18n()
+  const s = t.sidebar
+
+  return (
+    <div className="wrap-anywhere grid min-h-24 place-items-center rounded-lg px-2 text-center text-xs text-(--ui-text-tertiary)">
+      <div className="flex flex-col items-center gap-1.5">
+        <p>{s.noMatch(query)}</p>
+        {query.trim() && (
+          <Button
+            className="text-(--ui-text-secondary)"
+            onClick={() => requestFreshSession(query)}
+            size="sm"
+            variant="ghost"
+          >
+            <Codicon name="add" size="0.75rem" />
+            {s.startSessionAbout(query)}
+          </Button>
+        )}
       </div>
     </div>
   )

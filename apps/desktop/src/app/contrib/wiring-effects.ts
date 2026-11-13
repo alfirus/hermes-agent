@@ -2,8 +2,9 @@ import { useStore } from '@nanostores/react'
 import { useEffect, useRef } from 'react'
 import type { NavigateFunction } from 'react-router'
 
-import { $freshSessionRequest, refreshActiveProfile } from '@/store/profile'
+import { $freshSessionRequest, refreshActiveProfile, takeFreshSessionDraftSeed } from '@/store/profile'
 
+import { requestComposerInsert } from '../chat/composer/focus'
 import { resetProjectTreeState } from '../right-sidebar/files/use-project-tree'
 import { SETTINGS_ROUTE } from '../routes'
 
@@ -53,6 +54,9 @@ export function usePublishRestartPreviewServer(restartPreviewServer: RestartPrev
 
 // A profile switch/create drops to a fresh new-session draft so the
 // previously open session doesn't bleed across contexts. Skip initial value.
+// A request may carry a composer seed (e.g. the sidebar search dead-end:
+// "start a session about <query>") — it lands in the new draft's composer
+// after the route settles, exactly like the worktree-start prefill.
 export function useFreshSessionRequest(startFreshSessionDraft: () => void) {
   const freshSessionRequest = useStore($freshSessionRequest)
   const lastFreshRef = useRef(freshSessionRequest)
@@ -65,6 +69,12 @@ export function useFreshSessionRequest(startFreshSessionDraft: () => void) {
 
     lastFreshRef.current = freshSessionRequest
     startFreshSessionDraft()
+
+    const seed = takeFreshSessionDraftSeed()
+
+    if (seed) {
+      requestComposerInsert(seed, { target: 'main' })
+    }
   }, [freshSessionRequest, startFreshSessionDraft])
 }
 

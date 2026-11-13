@@ -187,6 +187,7 @@ import {
   SidebarBlankState,
   SidebarLoadErrorState,
   SidebarPinnedEmptyState,
+  SidebarSearchNoMatchState,
   SidebarSessionSkeletons,
   SidebarStorageCorruptNotice
 } from './section-states'
@@ -1732,9 +1733,7 @@ export function ChatSidebar({
                   searchPending ? (
                     <SidebarSessionSkeletons />
                   ) : (
-                    <div className="wrap-anywhere grid min-h-24 place-items-center rounded-lg px-2 text-center text-xs text-(--ui-text-tertiary)">
-                      {s.noMatch(trimmedQuery)}
-                    </div>
+                    <SidebarSearchNoMatchState query={trimmedQuery} />
                   )
                 }
                 label={s.results}
