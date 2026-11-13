@@ -3314,7 +3314,17 @@ export const en: Translations = {
       working: 'Working',
       done: 'Done'
     },
-    markAllRead: 'Mark all as read'
+    markAllRead: 'Mark all as read',
+    bulk: {
+      select: 'Select',
+      selectAll: 'Select all',
+      deselectAll: 'Deselect all',
+      archiveSelected: count => `Archive ${count} selected`,
+      cancel: 'Cancel',
+      selectedCount: count => `${count} selected`,
+      toggleSelect: title => `Select "${title}"`,
+      markSectionRead: 'Mark all in this section as read'
+    }
   },
 
   composer: {

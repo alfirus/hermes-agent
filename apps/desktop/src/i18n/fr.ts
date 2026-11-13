@@ -3765,7 +3765,17 @@ export const frOverrides = {
       working: 'En cours',
       done: 'Terminées'
     },
-    markAllRead: 'Tout marquer comme lu'
+    markAllRead: 'Tout marquer comme lu',
+    bulk: {
+      select: 'Sélectionner',
+      selectAll: 'Tout sélectionner',
+      deselectAll: 'Tout désélectionner',
+      archiveSelected: count => `Archiver ${count} sélectionnées`,
+      cancel: 'Annuler',
+      selectedCount: count => `${count} sélectionnées`,
+      toggleSelect: title => `Sélectionner « ${title} »`,
+      markSectionRead: 'Tout marquer comme lu dans cette section'
+    }
   },
   composer: {
     message: 'Message',

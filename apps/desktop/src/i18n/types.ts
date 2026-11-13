@@ -2921,6 +2921,17 @@ export interface Translations extends NoticeTranslations {
       done: string
     }
     markAllRead: string
+    // Bulk triage on a flat sessions section: select rows, archive in bulk.
+    bulk: {
+      select: string
+      selectAll: string
+      deselectAll: string
+      archiveSelected: (count: number) => string
+      cancel: string
+      selectedCount: (count: number) => string
+      toggleSelect: (title: string) => string
+      markSectionRead: string
+    }
   }
 
   composer: {

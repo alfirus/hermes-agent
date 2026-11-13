@@ -31,6 +31,9 @@ interface SessionRowCommonProps {
   onResume: () => void
   reorderable?: boolean
   showProfile?: boolean
+  selectionMode?: boolean
+  selected?: boolean
+  onToggleSelected?: () => void
 }
 
 export interface VirtualSessionListProps {
@@ -56,6 +59,11 @@ export interface VirtualSessionListProps {
   pinned: boolean
   showProfileTags?: boolean
   sortable: boolean
+  /** Bulk triage: render rows with a select checkbox; a body click toggles
+   *  instead of resuming. Drag/reorder is suppressed while it's on. */
+  selectionMode?: boolean
+  selectedIds?: ReadonlySet<string>
+  onToggleSelected?: (sessionId: string) => void
 }
 
 // Matches the card's typical rendered height (four lines when a preview
@@ -80,7 +88,10 @@ export const VirtualSessionList: FC<VirtualSessionListProps> = ({
   onToggleUnread,
   pinned,
   showProfileTags = false,
-  sortable
+  sortable,
+  selectionMode = false,
+  selectedIds,
+  onToggleSelected
 }) => {
   const { t } = useI18n()
   const dividerLabels = t.sidebar.dateDivider
@@ -157,7 +168,8 @@ export const VirtualSessionList: FC<VirtualSessionListProps> = ({
     }
 
     const { branchStem, session } = row.entry
-    const reorderable = sortable && !branchStem
+    // Selection mode and drag-to-reorder can't share a press: plain rows win.
+    const reorderable = sortable && !branchStem && !selectionMode
 
     const commonProps: SessionRowCommonProps = {
       branchStem,
@@ -171,6 +183,9 @@ export const VirtualSessionList: FC<VirtualSessionListProps> = ({
       onToggleUnread: () => onToggleUnread(session.id),
       onResume: () => onResumeSession(session.id, session),
       reorderable,
+      selectionMode,
+      selected: selectedIds?.has(session.id) ?? false,
+      onToggleSelected: onToggleSelected ? () => onToggleSelected(session.id) : undefined,
       showProfile: showProfileTags,
       unread: session.unread === true
     }

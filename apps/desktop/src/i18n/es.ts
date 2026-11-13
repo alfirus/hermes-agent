@@ -3746,7 +3746,17 @@ export const esOverrides = {
       working: 'En progreso',
       done: 'Completado'
     },
-    markAllRead: 'Marcar todo como leído'
+    markAllRead: 'Marcar todo como leído',
+    bulk: {
+      select: 'Seleccionar',
+      selectAll: 'Seleccionar todo',
+      deselectAll: 'Deseleccionar todo',
+      archiveSelected: count => `Archivar ${count} seleccionadas`,
+      cancel: 'Cancelar',
+      selectedCount: count => `${count} seleccionadas`,
+      toggleSelect: title => `Seleccionar «${title}»`,
+      markSectionRead: 'Marcar todo en esta sección como leído'
+    }
   },
   composer: {
     message: 'Mensaje',

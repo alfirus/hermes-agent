@@ -75,6 +75,12 @@ interface SidebarSessionRowProps extends React.ComponentProps<'div'> {
   reorderable?: boolean
   dragging?: boolean
   dragHandleProps?: React.HTMLAttributes<HTMLElement>
+  /** Bulk-triage mode: the row shows a select checkbox in place of its lead
+   *  affordance and clicks toggle selection instead of opening the session.
+   *  Owned by the sessions section (selection state is local to it). */
+  selectionMode?: boolean
+  selected?: boolean
+  onToggleSelected?: () => void
   /** Tag the row with its owning profile (initial chip + tooltip). Used by
    *  flat cross-profile lists — Pinned and search results in the All-profiles
    *  view — where no group header communicates ownership (#66003). */
@@ -140,6 +146,9 @@ function SidebarSessionRowImpl({
   reorderable = false,
   dragging = false,
   dragHandleProps,
+  selectionMode = false,
+  selected = false,
+  onToggleSelected,
   showProfile = false,
   card = false,
   className,
@@ -401,6 +410,12 @@ function SidebarSessionRowImpl({
         // activator only; the full handle stays on the grabber (see
         // useSortableBindings).
         onPointerDown={event => {
+          // Bulk triage: a press must never lift the row — the gesture is a
+          // selection toggle, not a drag.
+          if (selectionMode) {
+            return
+          }
+
           // The rename dialog and the ⋯ menu portal out of this row's React
           // subtree, so their presses land here with a target outside the row —
           // select the title in the dialog's input and the row would lift.
@@ -459,10 +474,24 @@ function SidebarSessionRowImpl({
           )}
           // Middle-click = open in a new tab (browser muscle memory).
           {...middleClickHandlers(() => {
+            if (selectionMode) {
+              return
+            }
+
             triggerHaptic('selection')
             openSession(session.id, () => undefined, 'tab')
           })}
           onClick={event => {
+            // Bulk triage: every click on the row body toggles selection;
+            // resume / modifier gestures are dead while the mode is on.
+            if (selectionMode) {
+              event.preventDefault()
+              event.stopPropagation()
+              onToggleSelected?.()
+
+              return
+            }
+
             // Modifier-click gestures on a row (see `resolveSessionRowClick`):
             //   ⇧          → pin / unpin
             //   ⌘/⌃        → open in a new tab (stack into main)
@@ -497,7 +526,32 @@ function SidebarSessionRowImpl({
           }}
         >
           {(() => {
-            const leadNode = reorderable ? (
+            // Bulk triage: the lead slot becomes a checkbox and the row's
+            // click / Enter / Space toggles selection (handled by the body
+            // resolver above — the checkbox itself is decorative so the row
+            // stays the single interactive element: a role="checkbox" here
+            // would nest the title button inside a checkbox, the same
+            // nested-interactive bug #38072 removed).
+            const selectionLead = (
+              <SidebarRowLead className="overflow-hidden">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'grid size-4 shrink-0 place-items-center rounded-[4px] border',
+                    selected
+                      ? 'border-(--ui-primary) bg-(--ui-primary) text-(--ui-primary-foreground)'
+                      : 'border-(--ui-border) bg-transparent'
+                  )}
+                  data-session-selected={selected ? 'true' : 'false'}
+                >
+                  {selected && <Codicon name="check" size="0.6875rem" />}
+                </span>
+              </SidebarRowLead>
+            )
+
+            const leadNode = selectionMode ? (
+              selectionLead
+            ) : reorderable ? (
               <SidebarRowGrab ariaLabel={handleLabel} dragging={dragging} dragHandleProps={dragHandleProps}>
                 {lead ?? (
                   <SessionStatusDot
@@ -540,7 +594,12 @@ function SidebarSessionRowImpl({
                         exactly as they did on the old full-row button. The
                         OverflowTip stays on the truncating label so its
                         scrollWidth measurement is unchanged. */}
-                    <RowButton className={cn('block w-full rounded-sm text-left', SIDEBAR_FOCUS_VISIBLE)}>
+                    <RowButton
+                      aria-checked={selectionMode ? selected : undefined}
+                      aria-label={selectionMode ? t.sidebar.bulk.toggleSelect(title) : undefined}
+                      className={cn('block w-full rounded-sm text-left', SIDEBAR_FOCUS_VISIBLE)}
+                      role={selectionMode ? 'checkbox' : undefined}
+                    >
                       <OverflowTip label={title} placement="row">
                         <SidebarRowLabel
                           className="hover-marquee block font-normal group-hover:text-foreground group-data-[working=true]:text-foreground/90"
@@ -608,7 +667,12 @@ function SidebarSessionRowImpl({
                   {/* #38072 finding 3: the card's title line is the row's real
                       button (same contract as the flat row: no onClick of its
                       own — the click bubbles to the body div's resolver). */}
-                  <RowButton className={cn('block w-full rounded-sm text-left', SIDEBAR_FOCUS_VISIBLE)}>
+                  <RowButton
+                    aria-checked={selectionMode ? selected : undefined}
+                    aria-label={selectionMode ? t.sidebar.bulk.toggleSelect(title) : undefined}
+                    className={cn('block w-full rounded-sm text-left', SIDEBAR_FOCUS_VISIBLE)}
+                    role={selectionMode ? 'checkbox' : undefined}
+                  >
                     <OverflowTip label={title} placement="row">
                       <SidebarRowLabel
                         className={cn(
@@ -676,6 +740,8 @@ function rowPropsEqual(a: SidebarSessionRowProps, b: SidebarSessionRowProps): bo
     a.isPinned === b.isPinned &&
     a.isSelected === b.isSelected &&
     a.unread === b.unread &&
+    a.selectionMode === b.selectionMode &&
+    a.selected === b.selected &&
     a.branchStem === b.branchStem &&
     a.reorderable === b.reorderable &&
     a.dragging === b.dragging &&

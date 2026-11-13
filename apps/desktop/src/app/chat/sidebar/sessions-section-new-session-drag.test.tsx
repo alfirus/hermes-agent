@@ -58,6 +58,17 @@ vi.mock('@/i18n', () => ({
           today: 'Today',
           yesterday: 'Yesterday'
         },
+        statusDivider: { done: 'Done', working: 'Working' },
+        bulk: {
+          select: 'Select',
+          selectAll: 'Select all',
+          deselectAll: 'Deselect all',
+          archiveSelected: (count: number) => `Archive ${count} selected`,
+          cancel: 'Cancel',
+          selectedCount: (count: number) => `${count} selected`,
+          toggleSelect: (title: string) => `Select "${title}"`,
+          markSectionRead: 'Mark all in this section as read'
+        },
         nav: { 'new-session': 'New session' },
         newSessionIn: (label: string) => `New session in ${label}`,
         noSessions: 'No sessions yet',

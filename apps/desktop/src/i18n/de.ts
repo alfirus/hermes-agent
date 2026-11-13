@@ -3758,7 +3758,17 @@ export const deOverrides = {
       working: 'In Arbeit',
       done: 'Erledigt'
     },
-    markAllRead: 'Alle als gelesen markieren'
+    markAllRead: 'Alle als gelesen markieren',
+    bulk: {
+      select: 'Auswählen',
+      selectAll: 'Alle auswählen',
+      deselectAll: 'Alle abwählen',
+      archiveSelected: count => `${count} ausgewählte archivieren`,
+      cancel: 'Abbrechen',
+      selectedCount: count => `${count} ausgewählt`,
+      toggleSelect: title => `„${title}“ auswählen`,
+      markSectionRead: 'Alle in diesem Bereich als gelesen markieren'
+    }
   },
   composer: {
     message: 'Nachricht',

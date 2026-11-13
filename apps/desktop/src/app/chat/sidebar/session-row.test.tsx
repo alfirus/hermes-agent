@@ -45,6 +45,16 @@ vi.mock('@/i18n', () => ({
           sessionRunning: 'Running',
           todoProgress: 'Tasks completed',
           waitingForAnswer: 'Waiting for answer'
+        },
+        bulk: {
+          select: 'Select',
+          selectAll: 'Select all',
+          deselectAll: 'Deselect all',
+          archiveSelected: (count: number) => `Archive ${count} selected`,
+          cancel: 'Cancel',
+          selectedCount: (count: number) => `${count} selected`,
+          toggleSelect: (title: string) => `Select "${title}"`,
+          markSectionRead: 'Mark all in this section as read'
         }
       },
       assistant: {
@@ -499,5 +509,85 @@ describe('SidebarSessionRow decoration slots', () => {
     })
 
     expect(screen.queryByTestId('lead-deco')).toBeNull()
+  })
+})
+
+// Bulk triage affordance (section owns the state; the row only paints and
+// forwards). selectionMode swaps the lead for a checkbox and turns the title
+// button into the checkbox the keyboard sees.
+describe('SidebarSessionRow selection mode', () => {
+  const renderSelect = (overrides: { selected?: boolean } = {}) =>
+    render(
+      <SidebarSessionRow
+        isPinned={false}
+        isSelected={false}
+        onArchive={noop}
+        onDelete={noop}
+        onPin={noop}
+        onResume={vi.fn()}
+        onToggleSelected={toggleSelected}
+        onToggleUnread={noop}
+        selected={overrides.selected ?? false}
+        selectionMode
+        session={makeSession({ title: 'Triaged' })}
+        unread={false}
+      />
+    )
+
+  const toggleSelected = vi.fn()
+
+  afterEach(() => toggleSelected.mockClear())
+
+  it('renders a checkbox-title with aria state and toggles on click', () => {
+    const { container } = renderSelect({ selected: true })
+
+    const checkbox = screen.getByRole('checkbox', { name: 'Select "Triaged"' })
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('true')
+    expect(container.querySelector('[data-session-selected="true"]')).not.toBeNull()
+
+    fireEvent.click(checkbox)
+
+    expect(toggleSelected).toHaveBeenCalledOnce()
+  })
+
+  it('shows an empty checkbox for an unselected row', () => {
+    const { container } = renderSelect()
+
+    expect(screen.getByRole('checkbox').getAttribute('aria-checked')).toBe('false')
+    expect(container.querySelector('[data-session-selected="false"]')).not.toBeNull()
+    expect(container.querySelector('[data-session-selected="true"]')).toBeNull()
+  })
+
+  it('a row click toggles selection instead of resuming', () => {
+    const onResume = vi.fn()
+
+    render(
+      <SidebarSessionRow
+        isPinned={false}
+        isSelected={false}
+        onArchive={noop}
+        onDelete={noop}
+        onPin={noop}
+        onResume={onResume}
+        onToggleSelected={toggleSelected}
+        onToggleUnread={noop}
+        selected
+        selectionMode
+        session={makeSession({ title: 'Body click' })}
+        unread={false}
+      />
+    )
+
+    fireEvent.click(screen.getByText('Body click'))
+
+    expect(toggleSelected).toHaveBeenCalledOnce()
+    expect(onResume).not.toHaveBeenCalled()
+  })
+
+  it('leaves the ordinary row untouched when selection mode is off', () => {
+    renderRow(makeSession({ title: 'Plain row' }))
+
+    expect(screen.queryByRole('checkbox')).toBeNull()
   })
 })

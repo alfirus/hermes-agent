@@ -1,15 +1,18 @@
 import type { useSensors } from '@dnd-kit/core'
 import { useStore } from '@nanostores/react'
 import type * as React from 'react'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { type NewSessionSplitHandler, startNewSessionDrag } from '@/app/chat/new-session-drag'
 import { SidebarPanelLabel } from '@/app/shell/sidebar-label'
+import { Button } from '@/components/ui/button'
+import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar'
+import { Tip } from '@/components/ui/tooltip'
 import type { HermesGitWorktree } from '@/global'
 import type { SessionInfo } from '@/hermes'
-import { useI18n } from '@/i18n'
+import { type Translations, useI18n } from '@/i18n'
 import { flattenSessionsWithBranches } from '@/lib/session-branch-tree'
 import {
   groupEntriesByRecency,
@@ -28,8 +31,9 @@ import {
   toggleWorkspaceNodeCollapsed
 } from '@/store/layout'
 import type { AgentProfileRoute } from '@/store/profile'
-import { sessionPinId } from '@/store/session'
+import { markSessionRead, sessionPinId } from '@/store/session'
 import { $sessionDotStateById, hasLiveTurn } from '@/store/session-dot-state'
+import { ackStoredSessionId } from '@/store/session-unread'
 
 import { SIDEBAR_FOCUS_VISIBLE, SidebarDateDivider, SidebarSectionMeta } from './chrome'
 import { GatewayProfileGroups } from './gateway-groups'
@@ -254,7 +258,88 @@ export function SidebarSessionsSection({
   const nodeOpen = useStore($sidebarWorkspaceNodeOpen)
   const isListGroupOpen = useCallback((key: string) => nodeOpen[listGroupNodeId(key)] ?? true, [nodeOpen])
   const sectionOpen = collapsible ? open : true
+
+  // ---- Bulk triage -------------------------------------------------------
+  // Selection state is LOCAL to the section (a Set of session ids, plus the
+  // mode flag); the actions ride the existing per-row seams — onToggleUnread
+  // (persisted watermark) + markSessionRead/ackStoredSessionId (transient dot
+  // layer, the same trio the row's ⋯ "Mark as read" uses), and
+  // onArchiveSession per selected id. No new store, no new RPC.
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() => new Set())
+
+  const exitSelection = useCallback(() => {
+    setSelectionMode(false)
+    setSelectedIds(new Set())
+  }, [])
+
+  const toggleSelected = useCallback((sessionId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+
+      if (next.has(sessionId)) {
+        next.delete(sessionId)
+      } else {
+        next.add(sessionId)
+      }
+
+      return next
+    })
+  }, [])
+
+  // The flat list is the bulk-triage surface: grouped/project/tree views
+  // render sessions through other callers' compositions where a section-level
+  // select-all would silently skip the rows under workspace group headers.
   const hasGroupedSessions = Boolean(groups?.some(group => group.sessions.length > 0 || group.mode === 'profile'))
+
+  const bulkTriageCapable =
+    !groups?.length && !projectOverview?.length && !projectContent && !pinned && sessions.length > 0
+
+  // Unread among the sessions THIS section lists: either the transient
+  // finished-dot layer (dotStates) or the persisted backend watermark
+  // (row.unread) — the same union the row's dot paints.
+  const unreadSessionIds = useMemo(
+    () =>
+      sessions
+        .filter(session => session.unread === true || dotStates[session.id] === 'unread')
+        .map(session => session.id),
+    [dotStates, sessions]
+  )
+
+  // "Mark all read" for this section: for every unread row, replay the exact
+  // trio the row menu's "Mark as read" uses — clear the transient family dot
+  // (markSessionRead), retire the persisted marker/watermark (ackStoredSessionId),
+  // and drop the backend watermark when the row carries one (onToggleUnread,
+  // which flips unread rows to read).
+  const markSectionRead = useCallback(() => {
+    for (const session of sessions) {
+      const rowUnread = session.unread === true
+      const dotUnread = dotStates[session.id] === 'unread'
+
+      if (!rowUnread && !dotUnread) {
+        continue
+      }
+
+      markSessionRead(session.id)
+      ackStoredSessionId(session.id)
+
+      if (rowUnread) {
+        onToggleUnread(session.id)
+      }
+    }
+  }, [dotStates, onToggleUnread, sessions])
+
+  // Bulk archive: fire the existing per-session seam once per selected id.
+  const archiveSelected = useCallback(() => {
+    const ids = [...selectedIds]
+
+    exitSelection()
+
+    for (const id of ids) {
+      onArchiveSession(id)
+    }
+  }, [exitSelection, onArchiveSession, selectedIds])
+
   // A defined project list is itself content (even an empty project should
   // render as a drill-in row so the user can see it exists).
   const hasProjectOverview = Boolean(projectOverview?.length)
@@ -293,7 +378,11 @@ export function SidebarSessionsSection({
         onPin: () => onTogglePin(sessionPinId(session)),
         onToggleUnread: () => onToggleUnread(session.id),
         onResume: () => onResumeSession(session.id, session),
-        reorderable: draggable && !branchStem,
+        // A drag and a multi-select can't share a press: selection mode wins.
+        reorderable: draggable && !branchStem && !selectionMode,
+        selectionMode,
+        selected: selectedIds.has(session.id),
+        onToggleSelected: () => toggleSelected(session.id),
         session,
         showProfile: showProfileTags,
         unread: session.unread === true
@@ -302,7 +391,7 @@ export function SidebarSessionsSection({
       // Key by (profile, id): twins with the same stored id in two profiles
       // are distinct rows (#92454) — a bare-id key makes React misattribute
       // one twin's rendered state to the other.
-      return draggable && !branchStem ? (
+      return draggable && !branchStem && !selectionMode ? (
         <SortableSidebarSessionRow key={`${session.profile ?? ''}::${session.id}`} {...rowProps} />
       ) : (
         <SidebarSessionRow key={`${session.profile ?? ''}::${session.id}`} {...rowProps} />
@@ -318,7 +407,10 @@ export function SidebarSessionsSection({
       onTogglePin,
       onToggleUnread,
       pinned,
-      showProfileTags
+      selectedIds,
+      selectionMode,
+      showProfileTags,
+      toggleSelected
     ]
   )
 
@@ -597,9 +689,12 @@ export function SidebarSessionsSection({
         onDeleteSession={onDeleteSession}
         onResumeSession={onResumeSession}
         onTogglePin={onTogglePin}
+        onToggleSelected={toggleSelected}
         onToggleUnread={onToggleUnread}
         pinned={pinned}
         rows={visibleRows}
+        selectedIds={selectedIds}
+        selectionMode={selectionMode}
         showProfileTags={showProfileTags}
         sortable={sessionsDraggable}
       />
@@ -639,6 +734,21 @@ export function SidebarSessionsSection({
         onToggle={onToggle}
         open={sectionOpen}
       />
+      {sectionOpen && bulkTriageCapable ? (
+        <SidebarBulkTriageRow
+          bulk={t.sidebar.bulk}
+          label={label}
+          onArchiveSelected={archiveSelected}
+          onCancel={exitSelection}
+          onMarkRead={markSectionRead}
+          onSelectAll={() => setSelectedIds(new Set(sessions.map(session => session.id)))}
+          onSelectionStart={() => setSelectionMode(true)}
+          selectedCount={selectedIds.size}
+          selectionMode={selectionMode}
+          totalCount={sessions.length}
+          unreadCount={unreadSessionIds.length}
+        />
+      ) : null}
       {sectionOpen && (
         <SidebarGroupContent className={resolvedContentClassName}>
           {inner}
@@ -655,6 +765,123 @@ export function SidebarSessionsSection({
 const DROP_TARGET_RING =
   'rounded-[6px] data-[session-drop-hover=true]:outline-2 data-[session-drop-hover=true]:-outline-offset-2 data-[session-drop-hover=true]:outline-sidebar-ring'
 
+// ---- Bulk triage row -----------------------------------------------------
+// A slim section-level row under the header: "Mark all read" clears the
+// unread flags of the sessions this section lists (each one through the same
+// store seams the row menu uses), and "Select" enters a multi-select mode
+// whose bar offers Select all / bulk Archive / Cancel. Selection lives in
+// the section component; the archive action fires the existing per-session
+// onArchiveSession seam once per selected id.
+interface SidebarBulkTriageRowProps {
+  bulk: Translations['sidebar']['bulk']
+  label: string
+  onCancel: () => void
+  onArchiveSelected: () => void
+  onMarkRead: () => void
+  onSelectAll: () => void
+  onSelectionStart: () => void
+  selectedCount: number
+  selectionMode: boolean
+  totalCount: number
+  unreadCount: number
+}
+
+function SidebarBulkTriageRow({
+  bulk,
+  label,
+  onCancel,
+  onArchiveSelected,
+  onMarkRead,
+  onSelectAll,
+  onSelectionStart,
+  selectedCount,
+  selectionMode,
+  totalCount,
+  unreadCount
+}: SidebarBulkTriageRowProps) {
+  if (selectionMode) {
+    const allSelected = selectedCount === totalCount && totalCount > 0
+
+    return (
+      <div
+        aria-label={`${bulk.select}: ${label}`}
+        className="flex shrink-0 items-center gap-1 px-2 pb-1 text-[0.6875rem] text-(--ui-text-tertiary)"
+        data-session-bulk-bar=""
+      >
+        <Button
+          className={BULK_BTN}
+          onClick={allSelected ? onCancel : onSelectAll}
+          size="xs"
+          variant="ghost"
+        >
+          {allSelected ? bulk.deselectAll : bulk.selectAll}
+        </Button>
+        <Button
+          className={BULK_BTN}
+          disabled={selectedCount === 0}
+          onClick={onArchiveSelected}
+          size="xs"
+          variant="ghost"
+        >
+          <Codicon name="archive" size="0.75rem" />
+          {bulk.archiveSelected(selectedCount)}
+        </Button>
+        <span className="ml-auto tabular-nums">{bulk.selectedCount(selectedCount)}</span>
+        <Tip label={bulk.cancel}>
+          <Button
+            aria-label={bulk.cancel}
+            className={BULK_BTN}
+            onClick={onCancel}
+            size="icon-xs"
+            variant="ghost"
+          >
+            <Codicon name="close" size="0.75rem" />
+          </Button>
+        </Tip>
+      </div>
+    )
+  }
+
+  if (unreadCount === 0 && totalCount <= 1) {
+    return null
+  }
+
+  return (
+    <div
+      aria-label={`${bulk.select}: ${label}`}
+      className="flex shrink-0 items-center justify-end gap-0.5 px-2 pb-0.5"
+      data-session-bulk-row=""
+    >
+      {unreadCount > 0 ? (
+        <Tip label={bulk.markSectionRead}>
+          <Button
+            aria-label={bulk.markSectionRead}
+            className={BULK_BTN}
+            onClick={onMarkRead}
+            size="icon-xs"
+            variant="ghost"
+          >
+            <Codicon name="check-all" size="0.75rem" />
+          </Button>
+        </Tip>
+      ) : null}
+      <Tip label={bulk.select}>
+        <Button
+          aria-label={bulk.select}
+          className={BULK_BTN}
+          onClick={onSelectionStart}
+          size="icon-xs"
+          variant="ghost"
+        >
+          <Codicon name="checklist" size="0.75rem" />
+        </Button>
+      </Tip>
+    </div>
+  )
+}
+
+const BULK_BTN = 'text-(--ui-text-tertiary) hover:text-(--ui-text-primary) gap-1 text-[0.6875rem]'
+
 const sessionDropTargetProps = (pinned: boolean) =>
   pinned ? { 'data-session-pin-drop': '' } : { 'data-session-unpin-drop': '' }
 
@@ -663,6 +890,9 @@ interface SortableSessionRowProps {
   isPinned: boolean
   isSelected: boolean
   unread: boolean
+  selectionMode?: boolean
+  selected?: boolean
+  onToggleSelected?: () => void
   onArchive: () => void
   onDelete: () => void
   onPin: () => void
