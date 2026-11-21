@@ -1,0 +1,16 @@
+[
+  { "version": "v0.9", "createSurface": { "surfaceId": "plan", "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json" } },
+  { "version": "v0.9", "updateDataModel": { "surfaceId": "plan", "value": { "task": "Cut release", "done": false } } },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "plan",
+      "components": [
+        { "id": "root", "component": "Column", "children": ["t", "row"] },
+        { "id": "t", "component": "Text", "text": { "path": "/task" } },
+        { "id": "row", "component": "Row", "children": ["go"] },
+        { "id": "go", "component": "Button", "child": "Approve", "action": { "event": { "name": "approve", "context": { "choice": "yes" } } } }
+      ]
+    }
+  }
+]
