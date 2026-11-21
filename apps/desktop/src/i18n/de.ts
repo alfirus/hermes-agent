@@ -2,6 +2,7 @@
 import { defineFieldCopy } from '@/app/settings/field-copy'
 
 import { deBoot } from './de_boot'
+import { deA2ui } from './de_a2ui'
 import { deClarify } from './de_clarify'
 import { deConnectorAccounts } from './de_connector_accounts'
 import { deConnectorCard } from './de_connector_card'
@@ -5171,6 +5172,7 @@ export const deOverrides = {
         `Dies fügt das Muster „${pattern}“ Ihrer dauerhaften Zulassungsliste hinzu (~/.hermes/config.yaml). Hermes fragt bei solchen Befehlen nicht mehr nach – weder in dieser noch in zukünftigen Sessions.`,
       alwaysAllow: 'Immer erlauben'
     },
+    a2ui: deA2ui,
     clarify: deClarify,
     themePicker: deThemePicker,
     catalogInstall: {

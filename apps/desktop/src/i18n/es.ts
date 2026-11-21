@@ -3,6 +3,7 @@ import { defineFieldCopy } from '@/app/settings/field-copy'
 
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { esBoot } from './es_boot'
+import { esA2ui } from './es_a2ui'
 import { esClarify } from './es_clarify'
 import { esConnectorAccounts } from './es_connector_accounts'
 import { esConnectorCard } from './es_connector_card'
@@ -5157,6 +5158,7 @@ export const esOverrides = {
         `Esto añade el patrón “${pattern}” a tu allowlist permanente (~/.hermes/config.yaml). Hermes no volverá a preguntar por comandos como este, ni en esta sesión ni en futuras.`,
       alwaysAllow: 'Permitir siempre'
     },
+    a2ui: esA2ui,
     clarify: esClarify,
     themePicker: esThemePicker,
     catalogInstall: {

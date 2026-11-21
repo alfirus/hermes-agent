@@ -3,6 +3,7 @@ import { defineFieldCopy } from '@/app/settings/field-copy'
 
 import { defineLocale, type TranslationOverrides } from './define-locale'
 import { frBoot } from './fr_boot'
+import { frA2ui } from './fr_a2ui'
 import { frClarify } from './fr_clarify'
 import { frConnectorAccounts } from './fr_connector_accounts'
 import { frConnectorCard } from './fr_connector_card'
@@ -5180,6 +5181,7 @@ export const frOverrides = {
         `Cela ajoute le motif « ${pattern} » à votre liste d'autorisation permanente (~/.hermes/config.yaml). Hermes ne redemandera plus pour ce type de commande — que ce soit dans cette session ou dans une session future.`,
       alwaysAllow: 'Toujours autoriser'
     },
+    a2ui: frA2ui,
     clarify: frClarify,
     themePicker: frThemePicker,
     catalogInstall: {

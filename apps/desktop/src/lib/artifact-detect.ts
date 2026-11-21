@@ -40,6 +40,7 @@ const HTML_LANGUAGES = new Set(['html', 'htm', 'xhtml'])
 // gets promoted to a code card and never reaches it.
 const NON_ARTIFACT_LANGUAGES = new Set([
   '',
+  'a2ui',
   'console',
   'diff',
   'listing',

@@ -7,6 +7,7 @@ import { enBilling } from './en_billing'
 import { enBoot } from './en_boot'
 import { enCatalog } from './en_catalog'
 import { enCatalogInstall } from './en_catalog_install'
+import { enA2ui } from './en_a2ui'
 import { enClarify } from './en_clarify'
 import { enConnectorAccounts } from './en_connector_accounts'
 import { enConnectorCard } from './en_connector_card'
@@ -4599,6 +4600,7 @@ export const en: Translations = {
         `This adds the “${pattern}” pattern to your permanent allowlist (~/.hermes/config.yaml). Hermes won’t ask again for commands like this — in this session or any future one.`,
       alwaysAllow: 'Always allow'
     },
+    a2ui: enA2ui,
     clarify: enClarify,
     themePicker: enThemePicker,
     catalogInstall: enCatalogInstall,

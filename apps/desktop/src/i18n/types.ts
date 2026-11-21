@@ -15,6 +15,7 @@ import type { BillingTranslations } from './types_billing'
 import type { BootTranslations } from './types_boot'
 import type { CatalogTranslations } from './types_catalog'
 import type { CatalogInstallTranslations } from './types_catalog_install'
+import type { A2uiCopy } from './types_a2ui'
 import type { ClarifyCopy } from './types_clarify'
 import type { ConnectorAccountsTranslations, ConnectorCardTranslations } from './types_connectors'
 import type { CronControlCopy } from './types_cron_control'
@@ -4084,6 +4085,7 @@ export interface Translations extends NoticeTranslations {
       alwaysDescription: (pattern: string) => string
       alwaysAllow: string
     }
+    a2ui: A2uiCopy
     clarify: ClarifyCopy
     themePicker: ThemePickerCopy
     catalogInstall: CatalogInstallTranslations
